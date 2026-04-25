@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Sakshiade31/shopmart-devops.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t shopmart:v2 .'
@@ -26,6 +20,30 @@ pipeline {
             steps {
                 sh 'docker run -d -p 8080:80 --name shopmart-container shopmart:v2'
             }
+        }
+
+        stage('Health Check') {
+            steps {
+                script {
+                    sleep(5)
+                    def status = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080", returnStdout: true).trim()
+                    
+                    if (status != "200") {
+                        error("Health check failed")
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Deployment failed! Rolling back..."
+
+            sh 'docker stop shopmart-container || true'
+            sh 'docker rm shopmart-container || true'
+
+            sh 'docker run -d -p 8080:80 --name shopmart-container shopmart:v1'
         }
     }
 }
