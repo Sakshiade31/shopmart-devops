@@ -25,7 +25,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    sleep(5)
+                    sleep(10)
                     def status = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://host.docker.internal:8080", returnStdout: true).trim() 
                     
                     if (status != "200") {
