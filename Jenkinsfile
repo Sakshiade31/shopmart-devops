@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     sleep(10)
-                    def status = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080", returnStdout: true).trim() 
+                    def status = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://172.17.0.1:8080", returnStdout: true).trim() 
                     
                     if (status != "200") {
                         error("Health check failed")
